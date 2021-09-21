@@ -1,0 +1,11 @@
+[Event "Game test"]
+[Site "Virtual"]
+[Date "????.??.??"]
+[Round "?"]
+[White "MCTS"]
+[Black "MCTS"]
+[Result "*"]
+
+1. f3 h5 2. e4 h4 3. a4 Na6 4. Na3 Rb8 5. Ne2 f5 6. Nc3 fxe4 7. Nab5 Nf6 8. g4
+e3 9. h3 Ng8 10. Bd3 c5 11. Bg6# *
+
