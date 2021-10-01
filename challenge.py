@@ -1,4 +1,5 @@
 import random
+from typing import Dict
 import fire
 import chess
 import chess.pgn
@@ -57,12 +58,12 @@ def play_contender(player_1,
     player_2.quit()
 
 
-def MCTSvsMCTS():
+def MCTSvsMCTS(p1: Dict = {'num_samples': 10, 'eval_type': 'naive', 'eval_args': {}},
+               p2: Dict = {'num_samples': 10, 'eval_type': 'naive', 'eval_args': {}}
+              ):
 
-    stockfish = chess.engine.SimpleEngine.popen_uci('stockfish')
-
-    p1 = MCTSPlayer(num_samples=100, stockfish=stockfish)
-    p2 = MCTSPlayer(num_samples=50, stockfish=stockfish)
+    p1 = MCTSPlayer(num_samples=p1['num_samples'], eval_type=p1['eval_type'], eval_args=p1['eval_args'])
+    p2 = MCTSPlayer(num_samples=p2['num_samples'], eval_type=p2['eval_type'], eval_args=p2['eval_args'])
 
     play_contender(p1,
                    p2,
