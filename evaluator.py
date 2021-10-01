@@ -53,11 +53,11 @@ class StockfishEvaluator(Evaluator):
         return value
 
     def init_simulation(self):
-        self._curr_depth = self._max_depth
+        self._curr_depth = 0
     
     def iterate(self, board):
-        self.depth -= 1
-        self.simulation_finished = board.is_game_over() or self._curr_depth == 0
+        self.depth += 1
+        self.simulation_finished = board.is_game_over() or self._curr_depth >= self._max_depth
 
 
 def _normalize(x, x_min=0, x_max=1, range_=(0, 1)):

@@ -75,7 +75,7 @@ def simulation(node, color, evaluator):
         while evaluator.simulation_finished():
             m = random.choice(list(node.board.legal_moves))
             node.board.push(m)
-            evaluator.iterate()
+            evaluator.iterate(node.board)
 
     return node, evaluator.evaluate(node.board, color)
 
