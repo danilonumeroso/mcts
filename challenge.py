@@ -26,6 +26,7 @@ def play_contender(player_1,
     white, black = (player_1, player_2) if random.uniform(0, 1) >= 0.5 else (player_2, player_1)
     white.set_color('White')
     black.set_color('Black')
+    
     game.headers["Event"] = f"Game {game_id}"
     game.headers["Site"] = "Virtual"
     game.headers["White"] = white.id['name']
