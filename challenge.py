@@ -24,7 +24,8 @@ def play_contender(player_1,
     moves = []
 
     white, black = (player_1, player_2) if random.uniform(0, 1) >= 0.5 else (player_2, player_1)
-
+    white.set_color('White')
+    black.set_color('Black')
     game.headers["Event"] = f"Game {game_id}"
     game.headers["Site"] = "Virtual"
     game.headers["White"] = white.id['name']
@@ -62,8 +63,8 @@ def MCTSvsMCTS(p1: Dict = {'num_samples': 10, 'eval_type': 'naive', 'eval_args':
                p2: Dict = {'num_samples': 10, 'eval_type': 'naive', 'eval_args': {}}
               ):
 
-    p1 = MCTSPlayer(num_samples=p1['num_samples'], eval_type=p1['eval_type'], eval_args=p1['eval_args'])
-    p2 = MCTSPlayer(num_samples=p2['num_samples'], eval_type=p2['eval_type'], eval_args=p2['eval_args'])
+    p1 = MCTSPlayer(p1['num_samples'], p1['depth'], p1['stockfish'])
+    p2 = MCTSPlayer(p2['num_samples'], p2['depth'], p2['stockfish'])
 
     play_contender(p1,
                    p2,

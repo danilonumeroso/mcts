@@ -28,3 +28,6 @@ class HumanPlayer:
 
     def quit(self):
         pass
+
+    def set_color(self, color):
+        pass

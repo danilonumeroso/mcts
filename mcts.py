@@ -1,110 +1,108 @@
-import math
-import chess
-import chess.engine
 import random
-import pdb
+import math
 from copy import deepcopy
+import numpy as np
 
 
-class Node:
-
-    def __init__(self):
-        self.ucb = 100
-        self.value = 0
-        self.children = []
-        self.parent = None
-        self.board = None
-        self.n = 0
-
-    def is_leaf(self):
-        return not self.children
-
-
-def mcts(root, num_samples, stockfish, depth):
+def monte_carlo_tree_search(state, num_samples, sim_depth, evaluate_fn):
+    root = Node(state, None)
     for _ in range(num_samples):
-        color = root.board.turn
-        root.n += 1
-        node = selection(root)
-        node = expansion(node)
-        node, value = simulation(node, color, stockfish=stockfish, depth=depth)
-        backpropagation(node, value)
-        # pdb.set_trace()
+        leaf = _selection(root)
+        if not leaf.state.is_terminal():
+            _expansion(leaf)
+            leaf = random.choice(leaf.children)
+            leaf.n += 1
 
+            terminal_state = _simulation(leaf.state, sim_depth)
+        else:
+            terminal_state = leaf.state
 
-def selection(root):
+        _backpropagation(leaf, evaluate_fn(terminal_state))
+    best_child = np.argmax([x.value for x in root.children])
+    
+    return best_child.state.action
+    
+
+        
+def _selection(root):
     if root.is_leaf():
         return root
 
     max_children = []
     max_ucb = float('-inf')
-    for i, node in enumerate(root.children):
-        if node.ucb > max_ucb:
-            max_children = [node]
-            max_ucb = node.ucb
-        elif node.ucb == max_ucb:
-            max_children.append(node)
+    curr_node = root
+    curr_node.n += 1
+    while not curr_node.is_leaf():
 
-    child = random.choice(max_children)
-    child.n += 1
+        for node in root.children:
+            if node.ucb > max_ucb:
+                max_children = [node]
+                max_ucb = node.ucb
+            elif node.ucb == max_ucb:
+                max_children.append(node)
+        curr_node = random.choice(max_children)
+        curr_node.n += 1
 
-    return selection(child)
+    return curr_node
 
 
-def expansion(node):
-
-    for move in node.board.legal_moves:
-        child = Node()
-        child.parent = node
-
-        board = deepcopy(node.board)
-        board.push(move)
-        child.board = board
-
+def _expansion(node):
+    for action in node.state.feasible_actions():
+        next_state = node.state.apply_action(action)
+        child = Node(next_state, node)
         node.children.append(child)
 
-    return node
+
+def _simulation(state, sim_depth):
+    state = deepcopy(state)
+    depth = 0
+    while (sim_depth == -1 or depth < sim_depth) and not state.is_terminal():
+        action = random.choice(state.get_feasible_actions)
+        state = state.apply_action(action, copy=False)
+        depth += 1
+    
+    return state
 
 
-def simulation(node, color, evaluator):
+def _backpropagation(leaf, value):
+    curr_node = leaf
+    while curr_node.parent is not None:
+        curr_node.value += value
+        curr_node.ucb = ucb(curr_node)
+        curr_node = curr_node.parent
 
-    if not node.board.is_game_over():
-        node = random.choice(node.children)
-        node.n += 1
-
-        evaluator.init_simulation()
-        while evaluator.simulation_finished():
-            m = random.choice(list(node.board.legal_moves))
-            node.board.push(m)
-            evaluator.iterate(node.board)
-
-    return node, evaluator.evaluate(node.board, color)
-
-
-# def simulation(node, depth, evaluator, color):
-
-#     for _ in depth:
-#         m = random.choice(list(node.board.legal_moves))
-#         node.board.push(m)
-
-#     return evaluator.analyse(node.board, limit=chess.engine.Limit(time=1))['score'].pov(color)
-
-
-def backpropagation(node, value):
-
-    while node.parent is not None:
-        node.value += value
-        node.ucb = ucb(node)
-        node = node.parent
-
-    node.value += value
+    curr_node.value += value
 
 
 def ucb(node):
     return node.value / node.n + math.sqrt(2) * math.sqrt(math.log2(node.parent.n) / node.n)
 
-# root = Node()
-# root.board = chess.Board()
 
-# mcts(root=root,
-#      num_samples=25,
-#      stockfish=None)
+class Node:
+
+    def __init__(self, state, parent):
+        self.parent = parent
+        self.children = []
+
+        self.state = state
+
+        self.value = 0
+        self.ucb = 100
+
+    def is_leaf(self):
+        return not self.children
+
+
+class StateRepresentation:
+
+    def __init__(self, state):
+        self._state = state
+    
+    def get_feasible_actions(self):
+        pass
+
+    def apply_action(self, action, copy=True):
+        pass
+
+    def is_terminal(self):
+        pass
