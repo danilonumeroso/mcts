@@ -27,42 +27,38 @@ class ChessState(StateRepresentation):
         return self.board.is_game_over()
 
 
-def board_eval_fn(color, stockfish=False, timeout=None):
-    if not stockfish:
-        def _eval_fn(state):
+class BoardEvaluator:
+    def __init__(self, color, stockfish=False, timeout=None) -> None:
+        self.color = color
+        if stockfish:
+            self.stockfish = chess.engine.SimpleEngine.popen_uci('stockfish')
+            self.timeout = timeout
+        else:
+            self.stockfish = None
+
+    def __call__(self, state):
+        if state.is_terminal():
             winner = state.board.outcome().winner
             if winner is None:
                 return 0
-            if winner == color:
+            if winner == self.color:
                 return 1
 
             return -1
-    else:
-        CLAMP_VALUE = 3000
-        engine = chess.engine.SimpleEngine.popen_uci('stockfish')
-        
-        def _eval_fn(state):
-            if state.is_terminal():
-                winner = state.board.outcome().winner
-                if winner is None:
-                    return 0
-                if winner == color:
-                    return 1
+        else:
+            value = self.stockfish.analyse(
+                state.board,
+                chess.engine.Limit(time=self.timeout)
+            )['score'].pov(self.color).score(mate_score=3000)
 
-                return -1
+            cv = 3000
+            value = min(cv, max(value, -cv))
             
-            else:
-                value = engine.analyse(
-                    state.board,
-                    chess.engine.Limit(time=timeout)
-                )['score'].pov(color).score(mate_score=3000)
+            return _normalize(value, x_min=-cv, x_max=cv, range_=(-1, 1))
 
-                cv = CLAMP_VALUE
-                value = min(cv, max(value, -cv))
-                
-                return _normalize(value, x_min=-cv, x_max=cv, range_=(-1, 1))
-        
-    return _eval_fn
+
+def board_eval_fn(color, stockfish=False, timeout=None):
+    return BoardEvaluator(color, stockfish, timeout)
     
 
 def _normalize(x, x_min=0, x_max=1, range_=(0, 1)):

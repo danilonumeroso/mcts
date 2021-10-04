@@ -34,7 +34,8 @@ class MCTSPlayer:
         return move
 
     def quit(self):
-        pass
+        if self.stockfish:
+            self.eval_fn.stockfish.quit()
     
     def set_color(self, color):
         self.eval_fn = board_eval_fn(color, self.stockfish, timeout=0.0001)
