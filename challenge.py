@@ -16,7 +16,7 @@ def play_contender(player_1,
                    record_game=True,
                    save_dir=None,
                    game_id=None,
-                   verbose=False,
+                   verbose=True,
                    callback=None):
 
     board = chess.Board()
@@ -35,7 +35,7 @@ def play_contender(player_1,
     for i in range(max_moves//2):
         player = white if board.turn else black
 
-        m = player.play(board, chess.engine.Limit(time=time_per_move)).move
+        m = player.play(board)
 
         if verbose:
             print(board.san(m))
@@ -60,8 +60,8 @@ def play_contender(player_1,
     player_2.quit()
 
 
-def MCTSvsMCTS(p1: Dict = {'num_samples': 10, 'eval_type': 'naive', 'eval_args': {}},
-               p2: Dict = {'num_samples': 10, 'eval_type': 'naive', 'eval_args': {}}
+def MCTSvsMCTS(p1: Dict = {'num_samples': 100000, 'depth': 20, 'stockfish': True},
+               p2: Dict = {'num_samples': 1000, 'depth': -1, 'stockfish': False}
               ):
 
     p1 = MCTSPlayer(p1['num_samples'], p1['depth'], p1['stockfish'])
@@ -91,4 +91,5 @@ def MCTSvsHuman():
 
 
 if __name__ == "__main__":
-    fire.Fire(MCTSvsHuman)
+    #fire.Fire(MCTSvsHuman)
+    MCTSvsMCTS()

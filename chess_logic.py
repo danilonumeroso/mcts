@@ -6,29 +6,31 @@ from mcts import StateRepresentation
 
 class ChessState(StateRepresentation):
 
-    def __init__(self, state, action):
-        super(self, ChessState).__init__(state)
+    def __init__(self, board, action):
+        self.board = board
         self.action = action
 
     def get_feasible_actions(self):
-        return list(self._state.legal_moves)
+        return list(self.board.legal_moves)
 
     def apply_action(self, action, copy=True):
         if copy: 
-            state_copy = deepcopy(self._state)
-            return ChessState(state_copy.push(action), action)
+            board_copy = deepcopy(self.board)
+            board_copy.push(action)
+            return ChessState(board_copy, action)
         else:
-            self._state.push(action)
+            self.board.push(action)
+            self.action = action
             return self
 
     def is_terminal(self):
-        return self._state.is_game_over()
+        return self.board.is_game_over()
 
 
-def board_eval_fn(color, stockfish=None, timeout=None):
+def board_eval_fn(color, stockfish=False, timeout=None):
     if not stockfish:
         def _eval_fn(state):
-            winner = state._state.outcome().winner
+            winner = state.board.outcome().winner
             if winner is None:
                 return 0
             if winner == color:
@@ -41,7 +43,7 @@ def board_eval_fn(color, stockfish=None, timeout=None):
         
         def _eval_fn(state):
             if state.is_terminal():
-                winner = state._state.outcome().winner
+                winner = state.board.outcome().winner
                 if winner is None:
                     return 0
                 if winner == color:
@@ -51,7 +53,7 @@ def board_eval_fn(color, stockfish=None, timeout=None):
             
             else:
                 value = engine.analyse(
-                    state._state,
+                    state.board,
                     chess.engine.Limit(time=timeout)
                 )['score'].pov(color).score(mate_score=3000)
 
