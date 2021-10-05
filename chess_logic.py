@@ -28,7 +28,7 @@ class ChessState(StateRepresentation):
 
 
 class BoardEvaluator:
-    def __init__(self, color, stockfish=False, timeout=None) -> None:
+    def __init__(self, color, stockfish=False, timeout=1e-10) -> None:
         self.color = color
         if stockfish:
             self.stockfish = chess.engine.SimpleEngine.popen_uci('stockfish')
