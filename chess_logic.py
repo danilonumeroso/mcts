@@ -1,4 +1,5 @@
 import chess
+import numpy as np
 from copy import deepcopy
 
 from mcts import StateRepresentation
@@ -51,10 +52,10 @@ class BoardEvaluator:
                 chess.engine.Limit(time=self.timeout)
             )['score'].pov(self.color).score(mate_score=3000)
 
-            cv = 3000
-            value = min(cv, max(value, -cv))
+            #cv = 3000
+            #value = min(cv, max(value, -cv))
             
-            return _normalize(value, x_min=-cv, x_max=cv, range_=(-1, 1))
+            return np.sign(value)
 
 
 def board_eval_fn(color, stockfish=False, timeout=None):

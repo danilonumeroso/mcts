@@ -1,4 +1,5 @@
 import random
+import pickle
 from typing import Dict
 import fire
 import chess
@@ -49,16 +50,33 @@ def play_contender(player_1,
 
         if board.is_game_over():
             break
-
+    
+    player_1.quit()
+    player_2.quit()
     if record_game:
         game.add_line(moves)
 
         with open(f"{save_dir}/game_{game_id}.pgn", "w", encoding="utf-8") as f:
             exporter = chess.pgn.FileExporter(f)
             game.accept(exporter)
+        
+        with open(f"{save_dir}/match_stats_{game_id}.pkl", "wb") as f:
+            dict_ = {
+                'white': {
+                    'num_samples': white.num_samples,
+                    'depth': white.depth,
+                    'stockfish': white.stockfish
+                },
+                'black': {
+                    'num_samples': black.num_samples,
+                    'depth': black.depth,
+                    'stockfish': black.stockfish
+                },
+                'winner': str(board.outcome().winner).lower(),
+                'moves': i
+            }
+            pickle.dump(dict_, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    player_1.quit()
-    player_2.quit()
 
 
 @ray.remote

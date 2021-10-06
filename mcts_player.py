@@ -20,7 +20,7 @@ class MCTSPlayer:
         self.eval_fn = None
         
         self.id = {
-            'name': "MCTS"
+            'name': f"{num_samples}_{depth}_{'T' if stockfish else 'F'}"
         }
 
     def play(self, board: chess.Board) -> chess.engine.PlayResult:
