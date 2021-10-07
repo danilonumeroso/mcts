@@ -15,7 +15,7 @@ class ChessState(StateRepresentation):
         return list(self.board.legal_moves)
 
     def apply_action(self, action, copy=True):
-        if copy: 
+        if copy:
             board_copy = deepcopy(self.board)
             board_copy.push(action)
             return ChessState(board_copy, action)
@@ -32,7 +32,7 @@ class BoardEvaluator:
     def __init__(self, color, stockfish=False, timeout=1e-10) -> None:
         self.color = color
         if stockfish:
-            self.stockfish = chess.engine.SimpleEngine.popen_uci('stockfish')
+            self.stockfish = chess.engine.SimpleEngine.popen_uci('/home/numeroso/mcts/stockfish')
             self.timeout = timeout
         else:
             self.stockfish = None
@@ -52,16 +52,8 @@ class BoardEvaluator:
                 chess.engine.Limit(time=self.timeout)
             )['score'].pov(self.color).score(mate_score=3000)
 
-            #cv = 3000
-            #value = min(cv, max(value, -cv))
-            
             return np.sign(value)
 
 
 def board_eval_fn(color, stockfish=False, timeout=None):
     return BoardEvaluator(color, stockfish, timeout)
-    
-
-def _normalize(x, x_min=0, x_max=1, range_=(0, 1)):
-    a, b = range_
-    return (b-a) * ((x - x_min) / (x_max - x_min)) + a

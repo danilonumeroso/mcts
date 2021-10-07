@@ -1,7 +1,6 @@
 import random
 import pickle
 from typing import Dict
-import fire
 import chess
 import chess.pgn
 import chess.engine
@@ -28,7 +27,7 @@ def play_contender(player_1,
     white, black = (player_1, player_2) if random.uniform(0, 1) >= 0.5 else (player_2, player_1)
     white.set_color('White')
     black.set_color('Black')
-    
+
     game.headers["Event"] = f"Game {game_id}"
     game.headers["Site"] = "Virtual"
     game.headers["White"] = white.id['name']
@@ -50,7 +49,7 @@ def play_contender(player_1,
 
         if board.is_game_over():
             break
-    
+
     player_1.quit()
     player_2.quit()
     if record_game:
@@ -59,7 +58,7 @@ def play_contender(player_1,
         with open(f"{save_dir}/game_{game_id}.pgn", "w", encoding="utf-8") as f:
             exporter = chess.pgn.FileExporter(f)
             game.accept(exporter)
-        
+
         with open(f"{save_dir}/match_stats_{game_id}.pkl", "wb") as f:
             dict_ = {
                 'white': {
@@ -72,29 +71,30 @@ def play_contender(player_1,
                     'depth': black.depth,
                     'stockfish': black.stockfish
                 },
-                'winner': str(board.outcome().winner).lower(),
+                'winner': str(board.outcome().winner).lower() if board.outcome().winner is not None else "Draw",
                 'moves': i
             }
             pickle.dump(dict_, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-
-@ray.remote
 def MCTSvsMCTS(p1: Dict = {'num_samples': 100000, 'depth': 20, 'stockfish': True},
                p2: Dict = {'num_samples': 1000, 'depth': -1, 'stockfish': False}
                ):
 
-    p1 = MCTSPlayer(p1['num_samples'], p1['depth'], p1['stockfish'])
-    p2 = MCTSPlayer(p2['num_samples'], p2['depth'], p2['stockfish'])
     p1_string = f"{p1['num_samples']}_{p1['depth']}_{'T' if p1['stockfish'] else 'F'}"
     p2_string = f"{p2['num_samples']}_{p2['depth']}_{'T' if p2['stockfish'] else 'F'}"
 
+    p1 = MCTSPlayer(p1['num_samples'], p1['depth'], p1['stockfish'])
+    p2 = MCTSPlayer(p2['num_samples'], p2['depth'], p2['stockfish'])
+
     play_contender(p1,
                    p2,
-                   save_dir='.',
+                   save_dir='./games',
                    game_id=f"{p1_string}_{p2_string}",
                    verbose=True,
                    time_per_move=1e-10)
+
+    return 0
 
 
 def MCTSvsHuman():
@@ -113,5 +113,4 @@ def MCTSvsHuman():
 
 
 if __name__ == "__main__":
-    #fire.Fire(MCTSvsHuman)
     MCTSvsMCTS()

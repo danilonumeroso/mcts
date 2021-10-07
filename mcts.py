@@ -20,18 +20,16 @@ def monte_carlo_tree_search(state, num_samples, sim_depth, evaluate_fn):
         _backpropagation(leaf, evaluate_fn(terminal_state))
     best_child = root.children[np.argmax([x.value for x in root.children])]
     return best_child.state.action
-    
 
-        
+
 def _selection(root):
 
-    max_children = []
-    max_ucb = float('-inf')
     curr_node = root
     curr_node.n += 1
     while not curr_node.is_leaf():
-
-        for node in root.children:
+        max_children = []
+        max_ucb = float('-inf')
+        for node in curr_node.children:
             if node.ucb > max_ucb:
                 max_children = [node]
                 max_ucb = node.ucb
@@ -49,6 +47,8 @@ def _expansion(node):
         child = Node(next_state, node)
         node.children.append(child)
 
+    assert len(node.children) > 0
+
 
 def _simulation(state, sim_depth):
     state = deepcopy(state)
@@ -57,7 +57,7 @@ def _simulation(state, sim_depth):
         action = random.choice(state.get_feasible_actions())
         state = state.apply_action(action, copy=False)
         depth += 1
-    
+
     return state
 
 
@@ -72,7 +72,7 @@ def _backpropagation(leaf, value):
 
 
 def ucb(node):
-    return node.value / node.n + math.sqrt(2) * math.sqrt(math.log2(node.parent.n) / node.n)
+    return node.value / node.n + 4 * math.sqrt(math.log2(node.parent.n) / node.n)
 
 
 class Node:
@@ -92,7 +92,7 @@ class Node:
 
 
 class StateRepresentation:
-    
+
     def get_feasible_actions(self):
         pass
 
