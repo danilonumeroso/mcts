@@ -1,2 +1,5 @@
 chess==1.7.0
+fire==0.4.0
 numpy==1.21.3
+six==1.16.0
+termcolor==1.1.0

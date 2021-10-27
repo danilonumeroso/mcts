@@ -23,7 +23,7 @@ class HumanPlayer:
             except Exception:
                 pass
 
-        return chess.engine.PlayResult(move=move, ponder=None)
+        return chess.engine.PlayResult(move=move, ponder=None).move
 
     def quit(self):
         pass

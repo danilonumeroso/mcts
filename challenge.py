@@ -1,6 +1,7 @@
 import random
 import math
 import pickle
+import fire
 from typing import Dict
 import chess
 import chess.pgn
@@ -38,11 +39,11 @@ def play_contender(player_1,
 
         m = player.play(board)
 
-        if verbose:
-            print(board.san(m))
-
         board.san_and_push(m)
         moves.append(m)
+
+        print(m)
+        print(board, "\n\n")
 
         if callback:
             callback(board)
@@ -77,9 +78,8 @@ def play_contender(player_1,
             pickle.dump(dict_, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def MCTSvsMCTS(p1: Dict = {'num_samples': 100000, 'depth': 20, 'c': math.sqrt(2), 'stockfish': True},
-               p2: Dict = {'num_samples': 1000, 'depth': -1, 'c': math.sqrt(2), 'stockfish': False}
-               ):
+def MCTSvsMCTS(p1: Dict = {'num_samples': 10, 'depth': 20, 'c': math.sqrt(2), 'stockfish': True},
+               p2: Dict = {'num_samples': 10, 'depth': -1, 'c': math.sqrt(2), 'stockfish': False}):
 
     p1_string = f"{p1['num_samples']}_{p1['depth']}_{p1['c']:.4f}_{'T' if p1['stockfish'] else 'F'}"
     p2_string = f"{p2['num_samples']}_{p2['depth']}_{p2['c']:.4f}_{'T' if p2['stockfish'] else 'F'}"
@@ -99,9 +99,7 @@ def MCTSvsMCTS(p1: Dict = {'num_samples': 100000, 'depth': 20, 'c': math.sqrt(2)
 
 def MCTSvsHuman():
 
-    stockfish = chess.engine.SimpleEngine.popen_uci('stockfish')
-
-    p1 = MCTSPlayer(num_samples=1000, stockfish=stockfish)
+    p1 = MCTSPlayer(num_samples=10, depth=-1, stockfish=False)
     p2 = HumanPlayer()
 
     play_contender(p1,
@@ -112,5 +110,12 @@ def MCTSvsHuman():
                    time_per_move=1e-10)
 
 
+def main(human: bool = False):
+    if human:
+        MCTSvsHuman()
+    else:
+        MCTSvsMCTS()
+
+
 if __name__ == "__main__":
-    MCTSvsMCTS()
+    fire.Fire(main)

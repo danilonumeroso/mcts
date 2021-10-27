@@ -4,6 +4,8 @@ from copy import deepcopy
 
 from mcts import StateRepresentation
 
+STOCKFISH_PATH = '/home/danilo/workspace/mcts/stockfish'
+
 
 class ChessState(StateRepresentation):
 
@@ -32,7 +34,7 @@ class BoardEvaluator:
     def __init__(self, color, stockfish=False, timeout=1e-10) -> None:
         self.color = color
         if stockfish:
-            self.stockfish = chess.engine.SimpleEngine.popen_uci('/home/numeroso/mcts/stockfish')
+            self.stockfish = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
             self.timeout = timeout
         else:
             self.stockfish = None
