@@ -99,7 +99,7 @@ def MCTSvsMCTS(p1: Dict = {'num_samples': 10, 'depth': 20, 'c': math.sqrt(2), 's
 
 def MCTSvsHuman():
 
-    p1 = MCTSPlayer(num_samples=10, depth=-1, stockfish=False)
+    p1 = MCTSPlayer(num_samples=10, depth=-1, c=math.sqrt(2), stockfish=False)
     p2 = HumanPlayer()
 
     play_contender(p1,
