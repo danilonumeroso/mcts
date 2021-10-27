@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from mcts import StateRepresentation
 
-STOCKFISH_PATH = '/home/danilo/workspace/mcts/stockfish'
+STOCKFISH_PATH = ''
 
 
 class ChessState(StateRepresentation):
