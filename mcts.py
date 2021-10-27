@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 
 
-def monte_carlo_tree_search(state, num_samples, sim_depth, evaluate_fn):
+def monte_carlo_tree_search(state, num_samples, sim_depth, c, evaluate_fn):
     root = Node(state, None)
     for _ in range(num_samples):
         leaf = _selection(root)
@@ -17,7 +17,7 @@ def monte_carlo_tree_search(state, num_samples, sim_depth, evaluate_fn):
         else:
             terminal_state = leaf.state
 
-        _backpropagation(leaf, evaluate_fn(terminal_state))
+        _backpropagation(leaf, c, evaluate_fn(terminal_state))
     best_child = root.children[np.argmax([x.value for x in root.children])]
     return best_child.state.action
 
@@ -61,18 +61,18 @@ def _simulation(state, sim_depth):
     return state
 
 
-def _backpropagation(leaf, value):
+def _backpropagation(leaf, c, value):
     curr_node = leaf
     while curr_node.parent is not None:
         curr_node.value += value
-        curr_node.ucb = ucb(curr_node)
+        curr_node.ucb = ucb(curr_node, c)
         curr_node = curr_node.parent
 
     curr_node.value += value
 
 
-def ucb(node):
-    return node.value / node.n + 4 * math.sqrt(math.log2(node.parent.n) / node.n)
+def ucb(node, c):
+    return node.value / node.n + c * math.sqrt(np.log(node.parent.n) / node.n)
 
 
 class Node:

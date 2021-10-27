@@ -12,10 +12,12 @@ class MCTSPlayer:
     def __init__(self,
                  num_samples,
                  depth,
+                 c,
                  stockfish
                  ):
         self.num_samples = num_samples
         self.depth = depth
+        self.c = c
         self.stockfish = stockfish
         self.eval_fn = None
         
@@ -29,6 +31,7 @@ class MCTSPlayer:
         move = monte_carlo_tree_search(state=root_state,
                                        num_samples=self.num_samples,
                                        sim_depth=self.depth,
+                                       c=self.c,
                                        evaluate_fn=self.eval_fn)
 
         return move
